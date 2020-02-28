@@ -205,7 +205,6 @@ export const useRifm = (props: Args): RenderProps => {
     });
   }
 
-  /*
   React.useEffect(() => {
     // until https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/inputType will be supported
     // by all major browsers (now supported by: +chrome, +safari, ?edge, !firefox)
@@ -232,7 +231,6 @@ export const useRifm = (props: Args): RenderProps => {
       document.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
-*/
 
   return {
     value: valueRef.current != null ? valueRef.current[0] : userValue,

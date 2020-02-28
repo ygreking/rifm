@@ -27,6 +27,7 @@ type Props = {|
 export const useRifm = (props: Args): RenderProps => {
   const [, refresh] = React.useReducer(c => c + 1, 0);
   const valueRef = React.useRef(null);
+  var [selection, setSelection] = React.useState({ start: 0, end: 0 });
   const { replace, append } = props;
   const userValue = replace
     ? replace(props.format(props.value))
@@ -35,6 +36,11 @@ export const useRifm = (props: Args): RenderProps => {
   // state of delete button see comments below about inputType support
   const isDeleleteButtonDownRef = React.useRef(false);
 
+  const onSelectionChange = (
+    evt: SyntheticInputEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setSelection(evt.nativeEvent.selection);
+  };
   const onChange = (
     evt: SyntheticInputEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -51,11 +57,11 @@ export const useRifm = (props: Args): RenderProps => {
       }
     }
 
-    const eventValue = evt.target.value;
+    const eventValue = evt.nativeEvent.text;
 
     valueRef.current = [
       eventValue, // eventValue
-      evt.target, // input
+      evt.nativeEvetarget, // input
       eventValue.length > userValue.length, // isSizeIncreaseOperation
       isDeleleteButtonDownRef.current, // isDeleleteButtonDown
       userValue === props.format(eventValue), // isNoOperation
@@ -104,7 +110,7 @@ export const useRifm = (props: Args): RenderProps => {
       const clean = str => (str.match(props.accept || /\d/g) || []).join('');
 
       const valueBeforeSelectionStart = clean(
-        eventValue.substr(0, input.selectionStart)
+        eventValue.substr(0, selection.start)
       );
 
       // trying to find cursor position in formatted value having knowledge about valueBeforeSelectionStart
@@ -159,7 +165,7 @@ export const useRifm = (props: Args): RenderProps => {
       if (
         append != null &&
         // cursor at the end
-        input.selectionStart === eventValue.length &&
+        selection.start === eventValue.length &&
         !isNoOperation
       ) {
         if (isSizeIncreaseOperation) {
@@ -199,12 +205,14 @@ export const useRifm = (props: Args): RenderProps => {
           }
         }
 
-        input.selectionStart = input.selectionEnd =
-          start + (deleteWasNoOp ? 1 : 0);
+        setSelection({
+          start: start + (deleteWasNoOp ? 1 : 0),
+          end: start + (deleteWasNoOp ? 1 : 0),
+        });
       };
     });
   }
-
+  /*
   React.useEffect(() => {
     // until https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/inputType will be supported
     // by all major browsers (now supported by: +chrome, +safari, ?edge, !firefox)
@@ -231,10 +239,13 @@ export const useRifm = (props: Args): RenderProps => {
       document.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
+*/
 
   return {
     value: valueRef.current != null ? valueRef.current[0] : userValue,
     onChange,
+    onSelectionChange,
+    selection,
   };
 };
 
